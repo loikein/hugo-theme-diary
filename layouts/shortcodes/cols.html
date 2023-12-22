@@ -1,10 +1,9 @@
-{{ $cols := split .Inner "||" }}
-{{ $lang := .Get "lang" | default ( .Get 0 ) }}
-{{ $lang  = split $lang "," }}
-
-<div class="row">
+{{- $cols := split .Inner "||" -}}
+{{- $lang := .Get "lang" | default ( .Get 0 ) -}}
+{{- $lang  = split $lang "," -}}
+<div class="cols__row">
 {{ range $indCol,$col := $cols }}
-   <div class="column" {{ with $lang }} lang="{{ index $lang $indCol }}"{{ end }}>
+   <div class="cols__column" {{ with $lang }} lang="{{ index $lang $indCol }}"{{ end }}>
    {{ . | $.Page.RenderString (dict "display" "block") }}
    </div>
 {{ end }}

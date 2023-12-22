@@ -1,0 +1,36 @@
+.cols__row {
+  // mobile
+  display: grid;
+  width: 100%;
+  gap: 1rem;
+  margin: 0 0 1rem 0;
+
+  // desktop
+  // https://stackoverflow.com/a/62086985
+  @media (min-width: 600px) {
+    & {
+      grid-auto-columns: 1fr;
+      grid-auto-flow: column;
+      // the 2 lines above are equivalent as this line below:
+      // grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 0 0 1rem 0;
+    }
+  }
+
+  .cols__column {
+    &>p:last-child {
+      margin-bottom: 0;
+    }
+
+    &:nth-of-type(2n) {
+      margin-left: 1rem;
+
+      @media (min-width: 600px) {
+        & {
+          margin-left: 0;
+        }
+      }
+    }
+  }
+}
