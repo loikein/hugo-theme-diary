@@ -1,0 +1,12 @@
+// https://wiki.loikein.one/programming/web/css/#responsive-iframe
+.video-container {
+  width: 100%; // fixed
+  margin-bottom: 1rem;
+
+  iframe {
+    width: 100%; // this is the actual width setting
+  }
+}
+
+.video-container--16x9 iframe{ aspect-ratio: 16/9; }
+.video-container--4x3 iframe{ aspect-ratio: 4/3; }
