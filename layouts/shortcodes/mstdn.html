@@ -4,37 +4,36 @@
 {{- $json    := getJSON $prefix $baseUrl "/api/v1/statuses/" $id -}}
 {{- $cw      := $json.spoiler_text -}}
 {{- $media   := $json.media_attachments -}}
+{{- $lang    := $json.language -}}
 
 {{ if eq $cw "" }}
-<blockquote class="fediverse-status">
-  <div class="fediverse-status__content">
+<blockquote class="fedi-post">
+  <div class="fedi-post__content" lang={{ $lang }}>
   {{- $json.content | markdownify -}}
   </div>
   {{ with $media }}
-    <div class="fediverse-status__media">
+  <div class="fedi-post__media">
+  {{ range . }}
+    <a href="{{ .url }}"><img src="{{ .preview_url }}"{{ with .description }} alt="{{ . }}"{{ end }} /></a>
+  {{ end }}
+  </div>
+  {{ end }}
+{{ else }}
+<blockquote class="fedi-post fedi-post--cw">
+  <details lang={{ $lang }}>
+    <summary class="fedi-post__spoiler-label">
+      <span class="fedi-post__spoiler-tag">{{ i18n "click_to_open" }}</span>
+      <span class="fedi-post__spoiler-text">{{- $json.spoiler_text | markdownify -}}</span>
+    </summary>
+    <div class="fedi-post__content">{{- $json.content | markdownify -}}</div>
+    {{ with $media }}
+    <div class="fedi-post__media">
     {{ range . }}
-        <a href="{{ .url }}"><img src="{{ .preview_url }}"{{ with .description }} alt="{{ . }}"{{ end }} /></a>
+      <a href="{{ .url }}"><img src="{{ .preview_url }}"{{ with .description }} alt="{{ . }}"{{ end }} /></a>
     {{ end }}
     </div>
-  {{ end }}
-  <footer>&mdash;&nbsp;<cite>{{- $json.account.display_name -}}&nbsp;(@{{- $json.account.acct -}}&#8203;@{{- $baseUrl -}}) <a href="{{- $json.url -}}">{{- dateFormat "January 2, 2006" $json.created_at -}}</a></cite></footer>
-</blockquote>
-{{ else }}
-<blockquote class="fediverse-status fediverse-status-cw">
-  <details class="fediverse-status-cw__content">
-      <summary class="fediverse-status-cw__label">
-          <span class="fediverse-status-cw__tag">{{ i18n "click_to_open" }}</span>
-          <span class="fediverse-status-cw__spoiler-text">{{- $json.spoiler_text | markdownify -}}</span>
-      </summary>
-      <div>{{- $json.content | markdownify -}}</div>
-      {{ with $media }}
-        <div class="fediverse-status__media">
-        {{ range . }}
-            <a href="{{ .url }}"><img src="{{ .preview_url }}"{{ with .description }} alt="{{ . }}"{{ end }} /></a>
-        {{ end }}
-        </div>
-      {{ end }}
+    {{ end }}
   </details>
-  <footer>&mdash;&nbsp;<cite>{{- $json.account.display_name -}}&nbsp;(@{{- $json.account.acct -}}&#8203;@{{- $baseUrl -}}) <a href="{{- $json.url -}}">{{- dateFormat "January 2, 2006" $json.created_at -}}</a></cite></footer>
-</blockquote>
 {{ end }}
+<footer>&mdash;&nbsp;<cite>{{- $json.account.display_name -}}&nbsp;(@{{- $json.account.acct -}}&#8203;@{{- $baseUrl -}}) <a href="{{- $json.url -}}">{{- dateFormat "January 2, 2006" $json.created_at -}}</a></cite></footer>
+</blockquote>

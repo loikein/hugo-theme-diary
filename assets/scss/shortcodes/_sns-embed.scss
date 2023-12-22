@@ -1,0 +1,63 @@
+// twitter
+.twitter-tweet {
+  font-style: italic;
+
+  p {
+    font-style: normal;
+
+  &:last-of-type {
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+// fediverse
+
+.fedi-post {
+  // fix link
+  span.invisible {
+    visibility: visible;
+    opacity: 1;
+  }
+  a * {
+    color: inherit;
+  }
+}
+
+.fedi-post__media {
+  margin: 1em auto;
+  display: grid;
+  grid-template-columns: repeat( auto-fit, minmax(200px, 1fr) );
+  grid-template-rows: repeat( auto-fit, 200px );
+  grid-gap: 5px;
+  justify-items: center;
+
+  a {
+    /* aspect-ratio: 16/9; */
+    max-height: 200px;
+    /* max-height: 200px; */
+    max-width: 355px;
+
+    img {
+      height: 100%;
+      width: 100%;
+      object-fit: cover !important;
+    }
+  }
+}
+
+.fedi-post--cw {
+  .fedi-post__content {
+    margin-top: 1rem;
+  }
+
+  .fedi-post__spoiler-label {
+    // https://github.com/sass/node-sass/issues/2251#issuecomment-365861645
+    background-image: linear-gradient(135deg,
+          RGB(255,212,0,10%) 25%,
+          RGB(246, 240, 207,10%) 25%, RGB(246, 240, 207,10%) 50%,
+          RGB(255,212,0,10%) 50%, RGB(255,212,0,10%) 75%,
+          RGB(246, 240, 207,10%) 75%, RGB(246, 240, 207,10%) 100%);
+    background-size: 40px 40px;
+  }
+}
