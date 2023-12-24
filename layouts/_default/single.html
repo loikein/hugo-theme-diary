@@ -31,7 +31,11 @@
             {{- i18n "published_on" -}}
             <time itemprop="datePublished">{{- i18n "format_date_tosec" .PublishDate -}}</time>
 
-            {{- if ne .Lastmod .Date -}}
+            {{- if ne (.PublishDate.Format "January 2, 2006") (.Lastmod.Format "January 2, 2006") -}}
+            {{- /*
+            ignore lastmod on the same day
+            https://www.brycewray.com/posts/2022/06/get-good-git-info-hugo/
+            */ -}}
             <br>
             {{- i18n "last_mod_on" -}}
             <time itemprop="dateModified">{{- i18n "format_date_tosec" .Page.Lastmod -}}</time>
