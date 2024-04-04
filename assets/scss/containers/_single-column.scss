@@ -152,8 +152,8 @@
       padding: 50px 0 80px 0;
       display: flex;
 
-      .toc {
-        background-color: lighten(#212121, 10%);
+      body.night & .toc {
+        background-color: #424242;
       }
 
       .drawer-menu {
