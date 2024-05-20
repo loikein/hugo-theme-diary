@@ -1,7 +1,12 @@
 {{- /*
+Being tested as
+https://github.com/loikein/hugo-book/blob/master/layouts/_default/_markup/render-codeblock.html
+
 Documentation
 -------------
 https://gohugo.io/templates/render-hooks/#render-hooks-for-code-blocks
+https://www.veriphor.com/articles/code-block-render-hooks/
+https://www.veriphor.com/articles/link-and-image-render-hooks/
 
 Main variables
 --------------
@@ -19,8 +24,8 @@ References & reads
 https://discourse.gohugo.io/t/is-there-a-good-reason-not-to-have-a-mechanism-facilitating-a-title-for-code-blocks/40554/3
 https://github.com/hugo-fixit/FixIt/blob/master/layouts/_default/_markup/render-codeblock.html
 https://www.andreffs.com/blog/debug-in-hugo/
-https://www.veriphor.com/articles/link-and-image-render-hooks/
 https://transparentcode.com/how-to-use-prism-js-in-hugo/
+https://www.thenewdynamic.com/article/hugo-data/manipulation-slices-and-maps/
 
 Debugging helpers
 -----------------
@@ -29,6 +34,9 @@ map[hl_lines:1-3 6 lineNumbersInTable:true linenos:true linenostart:19]
 
 <p>{{ print .Attributes }}</p>
 map[title:test title]
+
+<p>{{ printf "%T" $linenostart }}</p>
+int
 
 Do not use
 ----------
@@ -51,6 +59,10 @@ Example result
   </pre>
 </div>
 
+DONE
+----
+Enable lineNos, hl_lines, and linenostart options for unsupported languages
+
 WIP
 ---
 Add whitespace display.
@@ -70,9 +82,22 @@ Step 1: Single space
 {{- $codeBlock  = ($codeBlock | replaceRE `(<span class="cl">)( +)` `$1<span class="ws">$2</span>`) -}}
 {{- $codeBlock | safeHTML -}}
 */ -}}
-{{ if transform.CanHighlight .Type }}{{- /* Supported language */ -}}
+{{ if transform.CanHighlight .Type }}{{- /* Supported languages */ -}}
   {{- transform.Highlight .Inner .Type .Options | safeHTML -}}
-{{ else }}{{- /* Unsupported language: mimic the chroma structure for easier CSS control */ -}}
+{{ else }}{{- /* Unsupported languages */ -}}
+  {{- /* new version using map */ -}}
+  {{- /* caution: the .Attributes variable names are all in lower case */ -}}
+  {{- $lineNos           := index .Attributes "linenos" | default "false" -}}
+  {{- $optionLineNos     := dict "lineNos" $lineNos -}}
+  {{- $hl_lines          := index .Attributes  "hl_lines" | default "" -}}
+  {{- $optionHlLines     := dict "hl_lines" $hl_lines -}}
+  {{- $linenostart       := index .Attributes "linenostart" | default 1 -}}
+  {{- $linenostart        = int $linenostart -}}
+  {{- $optionLinenostart := dict "linenostart" $linenostart -}}
+  {{- $options           := merge $optionLineNos $optionHlLines -}}
+  {{- $options            = merge $options $optionLinenostart -}}
+  {{- transform.Highlight .Inner .Type $options | safeHTML -}}
+{{- /* old version for reference:
   <div class="highlight">
   {{ with .Attributes.title }}
     <div class="highlight-title"><span>{{ . }}</span></div>
@@ -84,4 +109,5 @@ Step 1: Single space
       {{- end -}}
     </code></pre>
   </div>
+*/ -}}
 {{ end }}
