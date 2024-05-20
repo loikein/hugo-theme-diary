@@ -11,7 +11,7 @@
 <div id="app">
     {{- partial "mobile-header.html" . -}}
     {{/* mobile header */}}
-    <main id="content">
+    <main id="content" data-pagefind-body>
     <div id="streamContainer" class="stream-container">
         {{- block "main" . }}{{- end }}
     </div>
