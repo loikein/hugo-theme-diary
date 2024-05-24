@@ -1,0 +1,56 @@
+{{- /*
+
+Usage
+-----
+To list pages across the whole site,
+with given category,
+with given tags,
+and without given categories/tags.
+
+References
+----
+https://discourse.gohugo.io/t/how-to-select-both-pages-and-sections-on-the-same-level/17205/7
+https://medium.com/@zak_miller/hugo-how-to-filter-posts-with-a-tag-a161b3b121c2
+https://www.thenewdynamic.com/article/hugo-data/manipulation-slices-and-maps/
+https://discourse.gohugo.io/t/range-where-site-pages-params-tags/29801/2
+
+Debug helpers
+-------------
+<p>{{ $include }}</p>
+<p>{{ $exclude }}</p>
+<p>{{ $posts }}</p>
+<p>{{ . }}</p>
+
+*/ -}}
+
+{{- /* Get variables */ -}}
+
+{{- $cat     := .Get "category" | default "" -}}
+{{- $include := .Get "include" | default "" -}}
+{{- $include  = split $include "," | uniq -}}
+{{- $exclude := .Get "exclude" | default "" -}}
+{{- $exclude  = split $exclude "," | uniq -}}
+
+{{- /* Make list of all qualifying posts */ -}}
+
+{{- $posts := slice -}}
+{{- $set_inc_1 := where .Site.Pages ".Params.categories" "intersect" (slice $cat) -}}
+{{- $set_inc_2 := where .Site.Pages ".Params.tags" "intersect" $include -}}
+{{- $filtered  := $set_inc_1 | intersect $set_inc_2 -}}
+{{- with $filtered -}}
+  {{- range $filtered -}}
+    {{- if (not (intersect .Params.categories $exclude)) -}}
+      {{- if (not (intersect .Params.tags $exclude)) -}}
+        {{- $posts = $posts | append . -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Display the list */ -}}
+
+<ul>
+  {{- range (sort $posts "Date" "desc") -}}
+  <li><a href="{{ .Params.externalLink | default .RelPermalink }}">{{ .Title }}</a></li>
+  {{- end -}}
+</ul>
