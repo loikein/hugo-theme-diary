@@ -1,16 +1,19 @@
 name = "Diary"
 license = "MIT"
-licenselink = "https://github.com/amazingrise/hugo-theme-diary/blob/master/LICENSE"
+licenselink = "https://github.com/loikein/hugo-theme-diary/blob/master/LICENSE"
 description = "Moments piled up. A simple, elegant blog theme."
-homepage = "https://amazingrise.net/"
+homepage = "https://github.com/loikein/hugo-theme-diary"
 tags = ["blog"]
 features = ["mobile","elegant"]
-min_version = "0.115.0"
+min_version = "0.128.0"
 
 [author]
-  name = "amazingrise"
-  homepage = "https://amazingrise.net/"
-
+  [author.amazingrise]
+    name = "amazingrise"
+    homepage = "https://amazingrise.net/"
+  [author.loikein]
+    name = "loikein"
+    homepage = "https://github.com/loikein"
 
 # If porting an existing theme
 [original]

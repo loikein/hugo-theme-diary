@@ -53,7 +53,7 @@
 {{ end }}
 
 {{/* metadata */}}
-{{ if .Site.GoogleAnalytics }}
+{{ if .Site.Config.Services.GoogleAnalytics.ID }}
 {{ template "_internal/google_analytics.html" . }}
 {{ end }}
 
@@ -93,7 +93,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-normalize@2/modern-normalize.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 {{/* unified journal css */}}
-{{ $styles := resources.Get "scss/journal.scss" | resources.ExecuteAsTemplate "journal.scss" . | resources.ToCSS | resources.Minify }}
+{{ $styles := resources.Get "scss/journal.scss" | resources.ExecuteAsTemplate "journal.scss" . |  css.Sass | resources.Minify }}
 <link rel="stylesheet" href="{{ $styles.RelPermalink }}" integrity="{{ $styles.Data.Integrity }}" media="screen" />
 
 {{/* custom CSS (site wide) under ./assets/css/ */}}

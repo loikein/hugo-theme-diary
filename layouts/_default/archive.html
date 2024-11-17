@@ -18,7 +18,7 @@
 {{- end -}}
 
 <div class="post-subtitle">
-There {{ if ne $articles_cat_count 1 }}are{{ else }}is{{ end }} {{ $articles_cat_count }} {{ if ne $articles_cat_count 1 }}entries{{ else }}entry{{ end }}, {{ $scratch.Get "allwordcount" | lang.NumFmt 0 }} words under the "{{ $type }}" category.<!--
+There {{ if ne $articles_cat_count 1 }}are{{ else }}is{{ end }} {{ $articles_cat_count }} {{ if ne $articles_cat_count 1 }}entries{{ else }}entry{{ end }}, {{ $scratch.Get "allwordcount" | lang.FormatNumberCustom 0 }} words under the "{{ $type }}" category.<!--
 --></div>
 
 {{/* end of archive heading */}}

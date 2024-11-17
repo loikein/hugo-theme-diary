@@ -1,19 +1,31 @@
-{{- with getJSON (printf "https://api.microlink.io/?url=%s" (.Get "src" | default (.Get 0))) -}}
+{{- $json := dict -}}
+{{- $url := (printf "https://api.microlink.io/?url=%s" (.Get "src" | default (.Get 0))) -}}
+{{- with resources.GetRemote $url -}}
+  {{- with .Err -}}
+    {{ errorf "%s" . }}
+  {{- else -}}
+    {{- $json  = . | transform.Unmarshal -}}
+  {{- end -}}
+{{- else -}}
+  {{ errorf "Unable to get remote resource %q" $url }}
+{{- end -}}
+
+{{- /* <pre>{{ debug.Dump $json }}</pre> */ -}}
+
 <div class="link-card">
-    <div class="link-card__body">
-        {{ with .data.logo }}
-        <img src="{{ .url }}" alt="" class="link-card__favicon">
-        {{ end }}
-        <div class="link-card__info">
-            <p class="link-card__title"><a href="{{ .data.url }}"class="stretched-link">{{ .data.title | title }}</a></p>
-            {{ with .data.description }}<p>{{ . | htmlUnescape | markdownify }}</p>{{ end }}
-        </div>
-    </div>
-    <div class="link-card__footer">
-        <p class="link-card__attribution">
-            {{ with .data.author }}{{ . }}{{ end }}{{ if and .data.author .data.publisher}},
-            {{ end }}{{ with .data.publisher }}<cite>{{ . }}</cite>{{ end }}
-        </p>
+<div class="link-card__body">
+    {{- with $json.data.logo }}
+    <img src="{{ $json.data.logo.url }}" alt="" class="link-card__favicon">
+    {{- end }}
+    <div class="link-card__info">
+        <p class="link-card__title"><a href="{{ $json.data.url }}"class="stretched-link">{{- $json.data.title -}}</a></p>
+        {{ with $json.data.description }}<p>{{- . | htmlUnescape | markdownify -}}</p>{{ end }}
     </div>
 </div>
-{{- end -}}
+<div class="link-card__footer">
+    <p class="link-card__attribution">
+        {{ with $json.data.author }}{{ . }}{{ end }}{{ if and $json.data.author $json.data.publisher}},
+        {{ end }}{{ with $json.data.publisher }}<cite>{{ . }}</cite>{{ end }}
+    </p>
+</div>
+</div>

@@ -1,7 +1,0 @@
-{{ $id   := index .Params 0 }}
-{{- $pc  := .Page.Site.Config.Privacy.Twitter -}}
-{{- if not $pc.Disable -}}
-{{- $url := printf "https://api.twitter.com/1.1/statuses/oembed.json?id=%v&dnt=true&omit_script=true" $id -}}
-{{- $json := getJSON $url -}}
-{{ $json.html | safeHTML }}
-{{- end -}}

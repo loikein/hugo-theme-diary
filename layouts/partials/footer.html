@@ -3,7 +3,7 @@
 {{ $js_journal := resources.Get "js/journal.js" | resources.Minify }}
 <script src="{{ $js_journal.RelPermalink }}"></script>
 
-{{- if not .Site.IsServer -}}{{/* partial "disqus.html" . */}}{{- end -}}
+{{- if not hugo.IsServer -}}{{/* partial "disqus.html" . */}}{{- end -}}
 
 {{/* copy code */}}
 {{ $js_copy_code := resources.Get "js/copy-code.js" | resources.Minify }}
