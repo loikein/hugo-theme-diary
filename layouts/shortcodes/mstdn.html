@@ -3,15 +3,15 @@
 {{- $id      := .Get 1 -}}
 {{ $json := dict }}
 {{ $url := (print $prefix $baseUrl "/api/v1/statuses/" $id) }}
-{{ with resources.GetRemote $url }}
-  {{ with .Err }}
+{{- with try (resources.GetRemote $url) -}}
+  {{- with .Err -}}
     {{ errorf "%s" . }}
-  {{ else }}
-    {{ $json = . | transform.Unmarshal }}
-  {{ end }}
-{{ else }}
-  {{ errorf "Unable to get remote resource %q" $url }}
-{{ end }}
+  {{- else with .Value -}}
+    {{- $json  = . | transform.Unmarshal -}}
+  {{- else -}}
+    {{ errorf "Unable to get remote resource %q" $url }}
+  {{- end -}}
+{{- end -}}
 {{- $cw      := $json.spoiler_text -}}
 {{- $media   := $json.media_attachments -}}
 {{- $lang    := $json.language -}}

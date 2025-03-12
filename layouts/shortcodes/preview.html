@@ -1,13 +1,13 @@
 {{- $json := dict -}}
 {{- $url := (printf "https://api.microlink.io/?url=%s" (.Get "src" | default (.Get 0))) -}}
-{{- with resources.GetRemote $url -}}
+{{- with try (resources.GetRemote $url) -}}
   {{- with .Err -}}
     {{ errorf "%s" . }}
-  {{- else -}}
+  {{- else with .Value -}}
     {{- $json  = . | transform.Unmarshal -}}
+  {{- else -}}
+    {{ errorf "Unable to get remote resource %q" $url }}
   {{- end -}}
-{{- else -}}
-  {{ errorf "Unable to get remote resource %q" $url }}
 {{- end -}}
 
 {{- /* <pre>{{ debug.Dump $json }}</pre> */ -}}
