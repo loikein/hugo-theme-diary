@@ -1,0 +1,89 @@
+{{- /*
+pitch:
+https://stackoverflow.com/questions/76161583/how-does-one-type-pitch-accent-indicators
+
+        https://japanese.meta.stackexchange.com/a/809
+
+        - ○ (U+25CB): correct (converts with まる in Windows IME)
+        - △ (U+25B3): sometimes correct (converts with さんかく in Windows IME)
+        - ？ (U+FF1F): questionable (full-width question mark)
+        - × (U+00D7): incorrect (converts with ばつ in Windows IME)
+
+        These usually appear directly before the first word of the sentence, and are generally only used for sentence examples isolated from any larger contextual text.
+
+        Linguists use an alternate set of symbols, and you'll find these on Japanese.SE as well:
+
+        - *　 Ungrammatical
+        - ?　 Of questionable grammaticality
+        - #　 Infelicitous (semantically or pragmatically anomalous)
+        - %　Grammatical in some dialect(s) only
+        - ! 　 Non-standard
+
+http://meta.japanese.stackexchange.com/a/982/1478
+== https://japanese.meta.stackexchange.com/questions/403/
+
+http://meta.japanese.stackexchange.com/questions/806
+== https://japanese.meta.stackexchange.com/questions/806/
+>>  https://japanese.meta.stackexchange.com/a/1152
+
+Our furigana system has been updated to show pitch accent! It's easy. Just type this in:
+
+ありがとう{LHLLL}
+
+And it turns into this:
+
+あ↗︎り↘︎がとう
+
+L stands for low, and H stands for high. Thanks to @cypher for implementing this idea!
+
+
+
+Notation varieties: https://japanese.stackexchange.com/a/11223
+broken link of graphs: https://web.archive.org/web/20220121101832/https://www.sanseido-publ.co.jp/publ/dicts/daijirin_ac.html
+
+1) follow japanese stack exchange (current method)
+
+2)
+notice that both り and が are the changed char,
+so maybe can just type `あ↗︎り↘︎がとう` and it would be split automatically,
+saving the counting of L's.
+
+but then: what about the fills (non-notated characters that are in-between)?
+
+Regex:
+https://stackoverflow.com/questions/6787716/regular-expression-for-japanese-characters#comment120905226_10508813
+findRE `(?:\\|\/)?[一-龠ぁ-ゔァ-ヴー々〆〤]`
+this looks あ/り\がとう and gets: (あ, /り, \が, と, う) which we want.
+
+failed attempt: ja.html.draft (removed)
+
+3)
+could also just use 0, 1, 2, … since there is going to be splitting work anyway
+*/ -}}
+
+{{- $word := split (.Get 0) "" -}}{{- /* example: ありがとう */ -}}
+{{- $acc  := split (.Get 1) "" -}}{{- /* example: LHLLL */ -}}
+{{- $hasEndDrop := ne (len $word) (len $acc) -}}
+{{- if $hasEndDrop -}}{{- /* check the user didn't input extra accent accidentally */ -}}
+  {{- if (eq (last 2 $acc) (split "HL" "")) -}}
+    {{ warnf "The number of characters does not match the number of accents. Make sure you really want a dropping ending accent (HL, 尾高型)." }}
+  {{- else -}}
+    {{ errorf "The number of characters does not match the number of accents, and the last two pitches are not HL. Please check your input." }}
+  {{- end -}}
+{{- end -}}
+
+<span lang="ja" class="ja-accent">
+{{- range $i, $chara := $word -}}
+
+  {{- $acc_this := index ($acc) ($i) -}}
+  {{- $acc_prev := index ($acc) (sub $i 1) -}}
+  {{- $acc_class := add ("ja-accent--") (lower $acc_this) -}}
+
+<span class="
+  {{- $acc_class -}}
+  {{- if and (ne $acc_this $acc_prev) (ne $i 0) }} ja-accent--change{{- end -}}
+  {{- if and (eq (add 1 $i) (len $word)) ($hasEndDrop) }} ja-accent--end{{- end -}}
+">{{- $chara -}}</span>
+
+{{- end -}}
+</span>
