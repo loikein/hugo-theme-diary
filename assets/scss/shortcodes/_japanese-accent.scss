@@ -1,17 +1,18 @@
+// oklch(0.62 0.1877 14.29 / 70%)
 .ja-accent--l {
-  border-bottom: 1px solid red;
+  border-bottom: 1px solid rgba(224, 71, 98, 0.7);
 }
 
 .ja-accent--h {
-  border-top: 1px solid red;
+  border-top: 1px solid rgba(224, 71, 98, 0.7);
   pitch: high;
   voice-pitch: high;
 }
 
 .ja-accent--change {
-  border-left: 1px solid red;
+  border-left: 1px solid rgba(224, 71, 98, 0.7);
 }
 
 .ja-accent--end {
-  border-right: 1px solid red;
+  border-right: 1px solid rgba(224, 71, 98, 0.7);
 }

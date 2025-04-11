@@ -1,11 +1,12 @@
-// https://github.com/alex-shpak/hugo-book/blob/master/assets/plugins/_numbered.scss
+// https://github.com/alex-shpak/hugo-book/blob/118997fa920e48acee7689fcf0cbb29d1b97ecb1/assets/plugins/_numbered.scss
+// using old version because somehow the bug is reversed
 
 $startLevel: 2;
 $endLevel: 3;
 
 .post-body:not(.archive-body) {
   @for $currentLevel from $startLevel through $endLevel {
-    > h#{$currentLevel}:not(.nonumber) {
+    h#{$currentLevel}:not(.nonumber) {
       counter-increment: h#{$currentLevel};
       counter-reset: h#{$currentLevel + 1};
 
@@ -22,10 +23,14 @@ $endLevel: 3;
 }
 
 .toc .toc-content ul ul {
-  counter-reset: item;
+  // counter-reset: item;
 
   li {
     counter-increment: item;
+
+    &:first-child {
+      counter-reset: item;
+    }
 
     &::before {
       content: counters(item, ".") ". ";

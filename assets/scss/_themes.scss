@@ -5,12 +5,13 @@ $color-accent: #037BBA;
 @mixin theme-day {
   --back-container-background: #fcfcfc;
   --front-container-background: #ffffff;
-  --mark: rgb(255,212,0,10%);
+  --mark: #{rgba($color-accent, 0.07)};
 
   --color-accent: #{$color-accent};
   --emphasis-accent: #{darken($color-accent, 10%)};
   --middle-accent: #{darken($color-accent, 50%)};
   --color-text: black;
+  --color-text-dark: white;
 
   @if lightness($color-accent) <20% {
     --emphasis-accent: #{$color-accent};
@@ -21,14 +22,15 @@ $color-accent: #037BBA;
 @mixin theme-night {
   --back-container-background: #212121;
   --front-container-background: #282828;
-  --mark: rgb(255,212,0,20%);
+  --mark: #{rgba($color-accent, 0.3)};
 
   --color-accent: #{$color-accent};
   --emphasis-accent: #{mix($color-accent, white, 50%)};
   // lighten($color-accent, $nav-item-hover-color-emphasis);
   // #{lighten($color-accent, 10%)};
   --middle-accent: #{mix($color-accent, white, 30%)};
-  --color-text: #{darken(#fff, 10%)};
+  --color-text: #{darken(#fff, 5%)};
+  --color-text-dark: black;
 
   @if lightness($color-accent) <20% {
     --color-accent: #{mix($color-accent, white, 50%)};
