@@ -96,6 +96,10 @@
 {{ $styles := resources.Get "scss/journal.scss" | resources.ExecuteAsTemplate "journal.scss" . |  css.Sass | resources.Minify }}
 <link rel="stylesheet" href="{{ $styles.RelPermalink }}" integrity="{{ $styles.Data.Integrity }}" media="screen" />
 
+{{/* material icon css */}}
+{{ $styles_icon := resources.Get "scss/_material-icons.scss" | resources.ExecuteAsTemplate "material-icons.scss" . |  css.Sass | resources.Minify }}
+<link rel="stylesheet" href="{{ $styles_icon.RelPermalink }}" integrity="{{ $styles_icon.Data.Integrity }}" media="screen" />
+
 {{/* custom CSS (site wide) under ./assets/css/ */}}
 {{ if .Site.Params.customCSS }}
 {{ $style := resources.Match "css/**.css" | resources.Concat "custom.css" | resources.Minify }}
