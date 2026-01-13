@@ -1,0 +1,12 @@
+<div class="post-item-meta" style="font-size: 75%; opacity: 40%; text-indent: calc(-1 * var(--archive-indent) - 1rem); padding-left: calc(var(--archive-indent) + 1rem);">
+
+{{- if gt .Params.categories 0 -}}
+  <i class="material-icons" style="margin-left: 0;">folder</i>
+  {{- range .Params.categories -}}{{ . }}&#32;{{- end -}}
+{{- end -}}
+
+{{- if gt .Params.tags 0 -}}
+  <i class="material-icons" style="margin-left: 0;">label</i>
+  {{- range .Params.tags -}}{{ . }}&#32;{{- end -}}
+{{- end -}}
+</div>

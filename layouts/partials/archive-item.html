@@ -1,0 +1,6 @@
+<li class="archive--list-item">
+<a href="{{ .RelPermalink }}">
+<span class="archive--date">{{ .Date.Format "Jan 02" }}</span>{{ if .Draft }}<span class="draft-label">{{ i18n "draft" }}</span>&nbsp;{{ end }}{{ .Title  }}
+</a>
+{{ partial "archive-item-meta.html" . }}
+</li>

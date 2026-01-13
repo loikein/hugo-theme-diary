@@ -21,6 +21,17 @@
 There {{ if ne $articles_cat_count 1 }}are{{ else }}is{{ end }} {{ $articles_cat_count }} {{ if ne $articles_cat_count 1 }}entries{{ else }}entry{{ end }}, {{ $scratch.Get "allwordcount" | lang.FormatNumberCustom 0 }} words under the "{{ $type }}" category.<!--
 --></div>
 
+{{ if ne .Site.Params.search false }}
+<div id="search"></div>
+<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/pagefind/pagefind-ui.js" type="text/javascript"></script>
+<script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+        new PagefindUI({ element: "#search", showSubResults: true });
+    });
+</script>
+{{ end }}
+
 {{/* end of archive heading */}}
 </div>
 
@@ -31,10 +42,13 @@ There {{ if ne $articles_cat_count 1 }}are{{ else }}is{{ end }} {{ $articles_cat
 
 {{/* Group articles by year and loop through them */}}
 {{- range (.Site.RegularPages.GroupByDate "2006") -}}
+
 {{/* Get articles to display */}}
 {{- $articles_yearly := (where .Pages "Type" $type) -}}
+
 {{/* Count articles returned */}}
 {{- $articles_yearly_count := len $articles_yearly -}}
+
 {{/* Check if a proper year is returned and if it contains any articles */}}
 {{ if and (gt .Key 1) (gt $articles_yearly_count 0) }}
 {{- range $index, $value := (where .Pages "Type" $type) -}}
@@ -43,12 +57,7 @@ There {{ if ne $articles_cat_count 1 }}are{{ else }}is{{ end }} {{ $articles_cat
   <h2 class="archive--year">{{ .Date.Format "2006" }} / {{ $articles_yearly_count }} {{ if ne $articles_cat_count 1 }}entries{{ else }}entry{{ end }}</h2>
   <ul class="article--list">
   {{ end }}
-  {{/* Display articles here */}}
-  <li class="archive--list-item">
-    <a href="{{ .RelPermalink }}">
-    <span class="archive--date">{{ .Date.Format "Jan 02" }}</span>{{ if .Draft }}<span class="draft-label">{{ i18n "draft" }}</span>&nbsp;{{ end }}{{ .Title  }}
-    </a>
-  </li>
+  {{- partial "archive-item.html" . -}}{{/* Display article */}}
   {{ end }}
   </ul>
 {{ end }}
