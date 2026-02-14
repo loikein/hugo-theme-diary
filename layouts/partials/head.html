@@ -93,17 +93,17 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-normalize@2/modern-normalize.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 {{/* unified journal css */}}
-{{ $styles := resources.Get "scss/journal.scss" | resources.ExecuteAsTemplate "journal.scss" . |  css.Sass | resources.Minify }}
-<link rel="stylesheet" href="{{ $styles.RelPermalink }}" integrity="{{ $styles.Data.Integrity }}" media="screen" />
+{{ $style_journal := resources.Get "scss/journal.scss" | resources.ExecuteAsTemplate "journal.scss" . |  css.Sass | resources.Minify }}
+<link rel="stylesheet" href="{{ $style_journal.RelPermalink }}" media="screen" />
 
 {{/* material icon css */}}
-{{ $styles_icon := resources.Get "scss/_material-icons.scss" | resources.ExecuteAsTemplate "material-icons.scss" . |  css.Sass | resources.Minify }}
-<link rel="stylesheet" href="{{ $styles_icon.RelPermalink }}" integrity="{{ $styles_icon.Data.Integrity }}" media="screen" />
+{{ $style_icon := resources.Get "scss/_material-icons.scss" | resources.ExecuteAsTemplate "material-icons.scss" . |  css.Sass | resources.Minify }}
+<link rel="stylesheet" href="{{ $style_icon.RelPermalink }}" />
 
 {{/* custom CSS (site wide) under ./assets/css/ */}}
 {{ if .Site.Params.customCSS }}
-{{ $style := resources.Match "css/**.css" | resources.Concat "custom.css" | resources.Minify }}
-<link rel="stylesheet" href="{{ $style.Permalink }}" integrity="{{ $style.Data.Integrity }}" media="screen" />
+{{ $style_site := resources.Match "css/**.css" | resources.Concat "custom.css" | resources.Minify }}
+<link rel="stylesheet" href="{{ $style_site.Permalink }}" media="screen" />
 {{ end }}
 
 {{/* custom CSS (page-wise) under each page folder */}}
@@ -117,6 +117,10 @@
   <link rel="stylesheet" href="{{ .Params.css.src }}" media="screen" />
 {{ end }}
 {{ end }}
+
+{{/* print css */}}
+{{- $style_print := resources.Get "scss/print.scss" | resources.ExecuteAsTemplate "print.scss" . |  css.Sass | resources.Minify  -}}
+<link rel="stylesheet" href="{{ $style_print.RelPermalink }}" media="print" />
 
 {{/* asynchronously load Google Fonts */}}
 {{/* https://csswizardry.com/2020/05/the-fastest-google-fonts/#google-fonts-async-snippet */}}

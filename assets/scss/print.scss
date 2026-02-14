@@ -1,0 +1,49 @@
+@import "plugins/numbered";
+@import "plugins/dl";
+@import "shortcodes/cols";
+@import "shortcodes/japanese-accent";
+
+@page {
+  // size: A3 portrait;
+  margin-left: 2cm;
+  margin-right: 2cm;
+
+  @bottom-right {
+    content: counter(page);
+  }
+}
+
+.single-column-drawer-container .drawer-menu-item,
+.single-column-nav-container,
+#pageHead,
+.a11y-links,
+#search,
+.post-pagination,
+#sideContainer,
+#extraContainer,
+#single-column-footer {
+  display: none;
+  visibility: collapse;
+}
+
+h2, h3, h4, h5 {
+  page-break-after: avoid;
+}
+
+table, figure, dl, .cols__row {
+  // Prevent the table from breaking across pages
+  page-break-inside: avoid;
+}
+
+table, th, td {
+  border: 1px solid darkgray;
+}
+
+table {
+  border-collapse: collapse;
+  margin: auto;
+}
+
+table td, table th, .table td, .table th {
+  padding: 0.5rem;
+}

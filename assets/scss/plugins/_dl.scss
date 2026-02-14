@@ -1,0 +1,27 @@
+.post-body {
+  dt {
+    font-weight: bold;
+    grid-column: 1;
+  }
+
+  dl:not(.post-series) {
+    display: grid;
+    gap: 0.5rem 1rem;
+
+    dd {
+      margin-bottom: 0;
+      margin-left: 40px;
+    }
+  }
+}
+
+@media (min-width: 600px) {
+  .post-body dl:not(.post-series) {
+    grid-template-columns: fit-content(50%) auto;
+
+    dd {
+      grid-column: 2;
+      margin-left: 0;
+    }
+  }
+}
