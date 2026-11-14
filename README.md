@@ -1,4 +1,41 @@
-# <div align="center">Hugo Theme Diary</div>
+# Hugo Theme Diary
+
+## Fork notes
+
+### Main features
+
+- Keep custom Chinese font that was dropped in upstream
+- Less dependency
+- Better CSS structure
+
+### Link preview card (newly modified)
+
+Self-contained link preview card, does not rely on any third-party services.
+
+Use:
+
+```md
+{{< link-preview "www.github.com" >}}
+<!-- or -->
+{{< preview "www.github.com" >}}
+<!-- or -->
+{{< link-card "www.github.com" >}}
+```
+
+Config: (Add to `hugo.yaml`. For toml, please use any online yaml-to-toml converter)
+
+```yaml
+security:
+  http:
+    mediaTypes: ['^application/manifest\+json$']
+
+caches:
+  getresource:
+    dir: ":cacheDir/:project"
+    maxAge: 8760h             # remember for a year
+```
+
+## Original readme opening section
 
 <div align="center">
 

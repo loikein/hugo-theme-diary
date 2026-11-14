@@ -1,0 +1,189 @@
+{{- /*
+  Self-hosted link preview: drop-in replacement for the Microlink version.
+  Usage: {{< preview "https://…" >}}  or  {{< preview src="https://…" >}}
+  Optional overrides: title, description, author, publisher, logo
+*/ -}}
+{{- $src := .Get "src" | default (.Get 0) -}}
+{{- $u := urls.Parse $src -}}
+{{- $meta := dict -}}
+{{- $links := slice -}}
+{{- $pageTitle := "" -}}
+{{- $jsonldLogo := "" -}}
+{{- $logoMax := 128 -}}{{- /* larger raster logos are downscaled to fit this box */ -}}
+
+{{- with try (resources.GetRemote $src (dict "headers" (dict
+      "User-Agent" "Mozilla/5.0 (compatible; HugoLinkPreview/1.0)"
+      "Accept" "text/html,application/xhtml+xml"))) -}}
+  {{- with .Err -}}
+    {{- if $.Get "title" -}}
+      {{- warnf "linkpreview: %s (using manual overrides)" . -}}
+    {{- else -}}
+      {{- errorf "linkpreview: %s" . -}}
+    {{- end -}}
+  {{- else with .Value -}}
+    {{- $html := .Content -}}
+
+    {{- /* <meta name|property="…" content="…"> in any attribute order / quote style */ -}}
+    {{- range findRE `(?is)<meta\s[^>]*>` $html -}}
+      {{- $tag := . -}}
+      {{- with findRESubmatch `(?i)\b(?:property|name|itemprop)\s*=\s*(?:"([^"]*)"|'([^']*)')` $tag 1 -}}
+        {{- $m := index . 0 -}}
+        {{- $key := lower (or (index $m 1) (index $m 2)) -}}
+        {{- with findRESubmatch `(?i)\bcontent\s*=\s*(?:"([^"]*)"|'([^']*)')` $tag 1 -}}
+          {{- $c := index . 0 -}}
+          {{- if not (isset $meta $key) -}}
+            {{- $meta = merge $meta (dict $key (or (index $c 1) (index $c 2) | htmlUnescape | strings.TrimSpace)) -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- /* <link rel href sizes type> */ -}}
+    {{- range findRE `(?is)<link\s[^>]*>` $html -}}
+      {{- $tag := . -}}
+      {{- $l := dict -}}
+      {{- range slice "rel" "href" "sizes" "type" -}}
+        {{- $a := . -}}
+        {{- with findRESubmatch (printf `(?i)(?:^|\s)%s\s*=\s*(?:"([^"]*)"|'([^']*)')` $a) $tag 1 -}}
+          {{- $m := index . 0 -}}
+          {{- $l = merge $l (dict $a (or (index $m 1) (index $m 2) | htmlUnescape | strings.TrimSpace)) -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if and $l.rel $l.href -}}{{- $links = $links | append (merge $l (dict "rel" (lower $l.rel))) -}}{{- end -}}
+    {{- end -}}
+
+    {{- /* JSON-LD Organization/publisher logo: "logo": "…" or "logo": {"url": "…"} */ -}}
+    {{- with findRESubmatch `(?s)"logo"\s*:\s*(?:\{[^{}]*?"(?:url|contentUrl)"\s*:\s*)?"([^"]+)"` $html 1 -}}
+      {{- $jsonldLogo = index (index . 0) 1 | replaceRE `\\/` "/" -}}
+    {{- end -}}
+
+    {{- with findRESubmatch `(?is)<title[^>]*>(.*?)</title>` $html 1 -}}
+      {{- $pageTitle = index (index . 0) 1 | htmlUnescape | strings.TrimSpace -}}
+    {{- end -}}
+  {{- else -}}
+    {{- if $.Get "title" -}}
+      {{- warnf "linkpreview: unable to get remote resource %q (using manual overrides)" $src -}}
+    {{- else -}}
+      {{- errorf "linkpreview: unable to get remote resource %q" $src -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Pick values: overrides → Open Graph/Twitter → plain HTML */ -}}
+{{- $title := .Get "title" | default (index $meta "og:title") | default (index $meta "twitter:title") | default $pageTitle | default $src -}}
+{{- $description := .Get "description" | default (index $meta "og:description") | default (index $meta "description") | default (index $meta "twitter:description") -}}
+{{- $publisher := .Get "publisher" | default (index $meta "og:site_name") | default (index $meta "application-name") | default (index $meta "apple-mobile-web-app-title") -}}
+{{- $author := .Get "author" -}}
+{{- if not $author -}}
+  {{- range slice "author" "article:author" "twitter:creator" -}}
+    {{- $v := index $meta . -}}
+    {{- if and (not $author) $v (not (findRE `^https?://` $v)) -}}{{- $author = $v -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* ---------- Logo ----------
+  Collect every candidate with a rough "size" score, then try them from best to worst.
+  The first one that downloads as a square-ish image wins. Wide/tall images (wordmarks)
+  are only used if nothing square-ish works.
+*/ -}}
+{{- $logo := .Get "logo" -}}
+{{- if not $logo -}}
+  {{- $cands := slice -}}
+  {{- $iconRels := slice "icon" "apple-touch-icon" "apple-touch-icon-precomposed" "fluid-icon" -}}
+
+  {{- with index $meta "og:logo" -}}{{- $cands = $cands | append (dict "href" . "base" $src "score" 3000.0) -}}{{- end -}}
+  {{- with index $meta "logo" -}}{{- $cands = $cands | append (dict "href" . "base" $src "score" 2900.0) -}}{{- end -}}
+  {{- with $jsonldLogo -}}{{- $cands = $cands | append (dict "href" . "base" $src "score" 2500.0) -}}{{- end -}}
+
+  {{- range $links -}}
+    {{- $l := . -}}
+    {{- $isIcon := false -}}
+    {{- range split $l.rel " " -}}{{- if in $iconRels . -}}{{- $isIcon = true -}}{{- end -}}{{- end -}}
+    {{- if $isIcon -}}
+      {{- $size := 0.0 -}}
+      {{- range findRESubmatch `(\d+)[xX](\d+)` ($l.sizes | default "") -1 -}}
+        {{- $size = math.Max $size (float (index . 1)) -}}
+      {{- end -}}
+      {{- if or (eq ($l.type | default "") "image/svg+xml") (findRE `(?i)\.svg(?:[?#]|$)` $l.href) (eq (lower ($l.sizes | default "")) "any") -}}
+        {{- $size = 2000.0 -}}{{- /* vector: scales to any size */ -}}
+      {{- else if eq $size 0.0 -}}
+        {{- $size = cond (hasPrefix $l.rel "apple-touch-icon") 180.0 32.0 -}}
+      {{- end -}}
+      {{- $cands = $cands | append (dict "href" $l.href "base" $src "score" $size) -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- /* Web app manifest icons */ -}}
+  {{- range first 1 (where $links "rel" "manifest") -}}
+    {{- $mURL := ((urls.Parse $src).ResolveReference (urls.Parse .href)).String -}}
+    {{- with try (resources.GetRemote $mURL) -}}{{- with .Value -}}
+      {{- with try (transform.Unmarshal .Content) -}}{{- with .Value -}}
+        {{- range .icons -}}
+          {{- $size := 0.0 -}}
+          {{- range findRESubmatch `(\d+)[xX](\d+)` (.sizes | default "") -1 -}}
+            {{- $size = math.Max $size (float (index . 1)) -}}
+          {{- end -}}
+          {{- if findRE `(?i)\.svg(?:[?#]|$)` .src -}}{{- $size = 2000.0 -}}{{- end -}}
+          {{- /* maskable icons carry extra padding; rank them a bit lower */ -}}
+          {{- if eq (strings.TrimSpace (.purpose | default "")) "maskable" -}}{{- $size = mul $size 0.6 -}}{{- end -}}
+          {{- $cands = $cands | append (dict "href" .src "base" $mURL "score" $size) -}}
+        {{- end -}}
+      {{- end -}}{{- end -}}
+    {{- end -}}{{- end -}}
+  {{- end -}}
+
+  {{- with index $meta "msapplication-tileimage" -}}{{- $cands = $cands | append (dict "href" . "base" $src "score" 144.0) -}}{{- end -}}
+  {{- $cands = $cands | append (dict "href" "/favicon.ico" "base" $src "score" 1.0) -}}
+
+  {{- $fallback := "" -}}
+  {{- range sort $cands "score" "desc" -}}
+    {{- if not $logo -}}
+      {{- $c := . -}}
+      {{- if hasPrefix $c.href "data:image" -}}
+        {{- $logo = $c.href -}}
+      {{- else -}}
+        {{- $abs := "" -}}
+        {{- with try ((urls.Parse $c.base).ResolveReference (urls.Parse $c.href)) -}}{{- with .Value -}}{{- $abs = .String -}}{{- end -}}{{- end -}}
+        {{- with $abs -}}
+          {{- with try (resources.GetRemote .) -}}{{- with .Value -}}
+            {{- if eq .MediaType.MainType "image" -}}
+              {{- $r := . -}}
+              {{- $squareish := true -}}
+              {{- if in (slice "jpeg" "png" "webp" "gif") .MediaType.SubType -}}
+                {{- $w := float .Width -}}{{- $h := float .Height -}}
+                {{- $squareish = le (div (math.Max $w $h) (math.Max (math.Min $w $h) 1.0)) 1.5 -}}
+                {{- if or (gt .Width $logoMax) (gt .Height $logoMax) -}}
+                  {{- $r = .Process (printf "fit %dx%d" $logoMax $logoMax) -}}
+                {{- end -}}
+              {{- end -}}
+              {{- if $squareish -}}
+                {{- $logo = $r.RelPermalink -}}
+              {{- else if not $fallback -}}
+                {{- $fallback = $r -}}
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}{{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if and (not $logo) $fallback -}}{{- $logo = $fallback.RelPermalink -}}{{- end -}}
+{{- end -}}
+
+<div class="link-card">
+<div class="link-card__body">
+    {{- with $logo }}
+    <img src="{{ . }}" alt="" class="link-card__favicon">
+    {{- end }}
+    <div class="link-card__info">
+        <p class="link-card__title"><a href="{{ $src }}" class="stretched-link">{{- $title -}}</a></p>
+        {{ with $description }}<p>{{- . | markdownify -}}</p>{{ end }}
+    </div>
+</div>
+<div class="link-card__footer">
+    <p class="link-card__attribution">
+        {{ with $author }}{{ . }}{{ end }}{{ if and $author $publisher }},
+        {{ end }}{{ with $publisher }}<cite>{{ . }}</cite>{{ end }}
+    </p>
+</div>
+</div>
